@@ -1,9 +1,6 @@
-import urllib.request
-import json
-
 import random
-import requests
-from bs4 import BeautifulSoup as bs
+import ijson
+import json
 
 
 def create_markov_chain(phrase):
@@ -18,8 +15,10 @@ def create_markov_chain(phrase):
                 continue
             foo_dict[phrase[i]] = 1
         else:
-            words[phrase[i]].append(phrase[i+1])
-
+            if i + 1 < len(phrase):
+                words[phrase[i]].append(phrase[i+1])
+            else:
+                continue
     return words
 
 
@@ -63,10 +62,31 @@ def load_data(file_name):
     return data
 
 
-if __name__ == "__main__":
-    dataset = load_data("tom_sawyer.txt")
+def get_metadata(data_file):
+    with open(data_file, 'r') as f:
+        for line in f:
+            yield line
 
-    generate_sentence(dataset, "The", 100)
+
+def create_abstract_data(input_name, output_name):
+    data_file = input_name
+
+    metadata = get_metadata(data_file)
+    f = open(output_name, 'w', encoding='utf8')
+
+    for paper in metadata:
+        paper_dict = json.loads(paper)
+        abstract = paper_dict.get('abstract')
+        f.write(abstract)
+
+    f.close()
+
+
+if __name__ == "__main__":
+    #create_abstract_data('test.json', 'test.txt')
+
+    generate_sentence(load_data('data.txt'), 'The', 5000)
+
 
 
 
