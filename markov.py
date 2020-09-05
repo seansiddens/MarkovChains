@@ -1,6 +1,6 @@
 import random
-import ijson
 import json
+import argparse
 
 
 def create_markov_chain(phrase):
@@ -34,20 +34,18 @@ def next_word(word, markov):
     return next_word_choice
 
 
-def generate_sentence(phrase, start_word, count):
-    print(start_word, end=' ')
-    markov_chain = create_markov_chain(phrase)
+def generate_sentence(markov, start_word, count=100):
     current_state = start_word
     word_count = 1
 
-    while next_word(current_state, markov_chain) != -1 and word_count < count:
-        next_state = next_word(current_state, markov_chain)
+    while next_word(current_state, markov) != -1 and word_count < count:
+        print(current_state, end=' ')
+        next_state = next_word(current_state, markov)
         word_count += 1
-        print(next_state, end=' ')
         current_state = next_state
 
 
-def load_data(file_name):
+def load_data(file_name='data.txt'):
     data = []
     try:
         f = open(file_name, "r", encoding='utf-8')
@@ -83,9 +81,24 @@ def create_abstract_data(input_name, output_name):
 
 
 if __name__ == "__main__":
-    #create_abstract_data('test.json', 'test.txt')
+    parser = argparse.ArgumentParser()
 
-    generate_sentence(load_data('data.txt'), 'The', 5000)
+    parser.add_argument("--data", '-d', help="Data file used to train Markov Chain")
+    parser.add_argument("--number", '-n', help="Number of words to generate")
+    parser.add_argument("--word", '-w', help="Set starting word")
+    args = parser.parse_args()
+
+    if args.data:
+        markov_chain = create_markov_chain(load_data(args.data))
+    else:
+        markov_chain = create_markov_chain(load_data())
+
+    if args.number and args.word:
+        generate_sentence(markov_chain, args.word, int(args.number))
+    elif args.word:
+        generate_sentence(markov_chain, args.word)
+
+
 
 
 
